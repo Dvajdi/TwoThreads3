@@ -13,6 +13,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 
 public class MainActivity extends AppCompatActivity implements Runnable,View.OnClickListener {
 
@@ -28,11 +30,19 @@ public class MainActivity extends AppCompatActivity implements Runnable,View.OnC
     static Thread t;
     android.support.v4.app.FragmentTransaction ft;
 
+    ArrayList <RawFragment> fragments;
+
+    String strPrice;
+    String strQuantity;
+    double result;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         findMyViews();
+
+        fragments = new ArrayList<>();
         isStop=true;
 
         h = new MyVeryOwnHandler();
@@ -60,9 +70,12 @@ public class MainActivity extends AppCompatActivity implements Runnable,View.OnC
     public void run() {
 
         while (isStop){
-        /*try{p1 = Double.valueOf(etPrice1.getText().toString());}catch(Exception e){p1=0;}
-        try{q1 = Double.valueOf(etQuantity1.getText().toString());}catch(Exception e){q1=1;}
-        int rez = (int) (p1/q1);*/
+            for (int i = 0; i <fragments.size() ; i++) {
+                strPrice =((EditText)fragments.get(i).getV().findViewById(R.id.et_price)).getText().toString();
+                strQuantity=((EditText)fragments.get(i).getV().findViewById(R.id.et_quantity)).getText().toString();
+
+
+            }
 
             rez++;
             Log.d("qwe","rez = "+rez);
@@ -102,7 +115,7 @@ Log.d("zxc","кликер раблотает");
         ft = getSupportFragmentManager().beginTransaction();
         ft.add(R.id.conteiner,fragment);
         ft.commit();
-
+        fragments.add(fragment);
     }
 
     private void onStopOnRun() {
