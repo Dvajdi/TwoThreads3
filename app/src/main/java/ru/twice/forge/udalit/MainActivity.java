@@ -1,6 +1,7 @@
 package ru.twice.forge.udalit;
 
 import android.app.FragmentTransaction;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
@@ -59,16 +60,10 @@ public class MainActivity extends AppCompatActivity implements Runnable,View.OnC
     private static class MyVeryOwnHandler extends Handler {
         public void handleMessage(Message msg) {
 
-            Log.d("asd", String.valueOf(msg.obj));
             View view=fragments.get(msg.what).getV();
-            ((TextView)view.findViewById(R.id.tv_res)).setText(((Double) msg.obj).toString());
-            fragments.get(msg.what).setRes((double) msg.obj);
-            bestNumbers=finder.getNumberMinRes();
-
-            if(bestNumbers.size()>0){
-            Log.d("rty",""+bestNumbers.get(0).toString());}
-
-            //tv.setText(String.valueOf(bestNumbers.get(0)));
+            ((TextView)view.findViewById(R.id.tv_res)).setText(msg.obj.toString());
+            if(msg.arg1==1){view.setBackgroundColor(Color.RED);}
+            if(msg.arg1==0){view.setBackgroundColor(Color.GREEN);}
         }
     };
 
@@ -80,24 +75,49 @@ public class MainActivity extends AppCompatActivity implements Runnable,View.OnC
     @Override
     public void run() {
             double price,quantity;
-            Double result;
+            double result,min;
+
+            RawFragment fragment;
+            View v;
+            ArrayList numbers;
+            int arg1;
         while (isStop){
             for (int i = 0; i <fragments.size() ; i++) {
-                strPrice =((EditText)fragments.get(i).getV().findViewById(R.id.et_price)).getText().toString();
-                strQuantity=((EditText)fragments.get(i).getV().findViewById(R.id.et_quantity)).getText().toString();
+                fragment=fragments.get(i);
+                v=fragment.getView();
+
+                if(v!=null){
+                strPrice =((EditText)v.findViewById(R.id.et_price)).getText().toString();
+                strQuantity=((EditText)v.findViewById(R.id.et_quantity)).getText().toString();
+
                 try {price=Double.valueOf(strPrice);}catch(Exception e){price=0;}
                 try{quantity=Double.valueOf(strQuantity);}catch(Exception e){quantity=1;}
                 result=price/quantity;
-                Log.d("zxc", "result =  " + result);
-                Message msg=h.obtainMessage(i,result);
-                h.sendMessage(msg);
+
+                fragment.setRes(result);
+                    min = getBestNumbers(fragments);
+                    Log.d("asd","min = "+min);
+                    //Sleeper.sleep(100);
+                if(result==min){arg1=1;}else{arg1=0;}
+
+                Message msg=h.obtainMessage(i,arg1,0,String.valueOf(result));
+                //Message msg=h.obtainMessage(i,String.valueOf(result));
+                h.sendMessage(msg);}
             }
 
-            Sleeper.sleep(50);
+
         }
     }
 
-
+double getBestNumbers(ArrayList<RawFragment>fragments){
+    double min=Double.MAX_VALUE;
+    double res=0;
+    for (int i = 0; i <fragments.size() ; i++) {
+        res=fragments.get(i).getRes();
+        if(res<min){min=res;}
+    }
+   return min;
+}
 
 
     void findMyViews() {
@@ -122,7 +142,6 @@ public class MainActivity extends AppCompatActivity implements Runnable,View.OnC
     }
 
     private void addRaw() {
-Log.d("zxc","кликер раблотает");
         RawFragment fragment = new RawFragment();
         ft = getSupportFragmentManager().beginTransaction();
         ft.add(R.id.conteiner,fragment);
@@ -134,10 +153,9 @@ Log.d("zxc","кликер раблотает");
         if(isStop==false){
             t=(Thread)getLastCustomNonConfigurationInstance();
             if(t==null)
-            {Log.d("asd","создался новый поток");t=new Thread(this);t.start();}
+            {t=new Thread(this);t.start();}
         }
         isStop=!isStop;
-        Log.d("qwe", "isStop = " + isStop);
     }
 
     @Override

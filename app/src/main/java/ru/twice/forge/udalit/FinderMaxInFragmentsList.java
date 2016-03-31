@@ -6,7 +6,7 @@ import java.util.ArrayList;
  * Created by twice on 31.03.16.
  */
 public class FinderMaxInFragmentsList {
-    ArrayList<RawFragment> fragments;
+   public ArrayList<RawFragment> fragments;
 
     public FinderMaxInFragmentsList(ArrayList<RawFragment> fragments) {
         this.fragments = fragments;
