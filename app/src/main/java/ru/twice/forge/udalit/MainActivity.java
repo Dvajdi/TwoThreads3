@@ -30,12 +30,14 @@ public class MainActivity extends AppCompatActivity implements Runnable,View.OnC
     static Thread t;
     android.support.v4.app.FragmentTransaction ft;
 
-    ArrayList <RawFragment> fragments;
+    static ArrayList <RawFragment> fragments;
+    static ArrayList bestNumbers;
 
     String strPrice;
     String strQuantity;
-    double result;
 
+
+    static FinderMaxInFragmentsList finder;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,13 +53,22 @@ public class MainActivity extends AppCompatActivity implements Runnable,View.OnC
         if(t==null){
         t = new Thread(this);
         t.start();}
-
+        finder = new FinderMaxInFragmentsList(fragments);
         }
 
     private static class MyVeryOwnHandler extends Handler {
         public void handleMessage(Message msg) {
-            tv.setText(String.valueOf(msg.what));
-            //tv.setText("Статус = "+t.isAlive());
+
+            Log.d("asd", String.valueOf(msg.obj));
+            View view=fragments.get(msg.what).getV();
+            ((TextView)view.findViewById(R.id.tv_res)).setText(((Double) msg.obj).toString());
+            fragments.get(msg.what).setRes((double) msg.obj);
+            bestNumbers=finder.getNumberMinRes();
+
+            if(bestNumbers.size()>0){
+            Log.d("rty",""+bestNumbers.get(0).toString());}
+
+            //tv.setText(String.valueOf(bestNumbers.get(0)));
         }
     };
 
@@ -68,20 +79,21 @@ public class MainActivity extends AppCompatActivity implements Runnable,View.OnC
 
     @Override
     public void run() {
-
+            double price,quantity;
+            Double result;
         while (isStop){
             for (int i = 0; i <fragments.size() ; i++) {
                 strPrice =((EditText)fragments.get(i).getV().findViewById(R.id.et_price)).getText().toString();
                 strQuantity=((EditText)fragments.get(i).getV().findViewById(R.id.et_quantity)).getText().toString();
-
-
+                try {price=Double.valueOf(strPrice);}catch(Exception e){price=0;}
+                try{quantity=Double.valueOf(strQuantity);}catch(Exception e){quantity=1;}
+                result=price/quantity;
+                Log.d("zxc", "result =  " + result);
+                Message msg=h.obtainMessage(i,result);
+                h.sendMessage(msg);
             }
 
-            rez++;
-            Log.d("qwe","rez = "+rez);
-            Log.d("qwe","isStop = "+isStop);
             Sleeper.sleep(50);
-        h.sendEmptyMessage(rez);
         }
     }
 

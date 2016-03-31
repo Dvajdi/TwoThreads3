@@ -10,6 +10,16 @@ import android.view.ViewGroup;
  * Created by twice on 30.03.16.
  */
 public class RawFragment extends Fragment {
+    double res;
+
+    public double getRes() {
+        return res;
+    }
+
+    public void setRes(double res) {
+
+        this.res = res;
+    }
 
     View v;
 
